@@ -68,3 +68,167 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+{
+    id: 1,
+    name: "Gucci",
+    price: 1099,
+    status: "Almost Out Of Stock",
+    image: "https://via.placeholder.com/150",
+  },
+  {
+    id: 2,
+    name: "U.S.Polo",
+    price: 2000,
+    status: "Stock is Available",
+    image: "https://via.placeholder.com/150",
+  },
+  {
+    id: 3,
+    name: "Wrogn",
+    price: 5099,
+    status: "Almost Out Of Stock",
+    image: "https://via.placeholder.com/150",
+  },
+  {
+    id: 4,
+    name: "Allen Solly",
+    price: 1099,
+    status: "Out Of Stock",
+    image: "https://via.placeholder.com/150",
+  }
+  import React, { useEffect, useState } from 'react';
+import { Gamepad2, Music, Smartphone, MonitorSmartphone, Search } from 'lucide-react';
+import Shimmer from './Shimmer';
+import Error from './Error';
+
+const EffectCard = () => {
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [searchText, setSearchText] = useState("");
+    const [filteredProducts, setFilteredProducts] = useState([]);
+
+    function handleSearch() {
+        const filtered = products.filter((product) =>
+            product.brand.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+    }
+
+    function handleCategory(e) {
+        const categoryMap = {
+            Gaming: 'gaming',
+            Music: 'audio',
+            Mobile: 'mobile',
+            Tv: 'tv',
+        };
+        const filtered = products.filter(
+            (product) => product.category === categoryMap[e.currentTarget.name]
+        );
+        setFilteredProducts(filtered);
+    }
+
+    async function getData() {
+        try {
+            const res = await fetch('https://fakestoreapi.in/api/products');
+            const data = await res.json();
+            setProducts(data.products);
+            setFilteredProducts(data.products);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsLoading(true);
+        }
+    }
+
+    useEffect(() => {
+        getData();
+    }, []);
+
+    return (
+        <div className="container mt-4">
+            <section>
+                <div className="container-fluid mt-3">
+                    <div className="row">
+                        <div className="col d-flex justify-content-center align-items-center gap-3 flex-wrap mb-3">
+                            <button
+                                className='btn btn-outline-primary'
+                                name='Gaming'
+                                onClick={handleCategory}
+                                title="Gaming"
+                            >
+                                <Gamepad2 />
+                            </button>
+                            <button
+                                className='btn btn-outline-success'
+                                name='Music'
+                                onClick={handleCategory}
+                                title="Music"
+                            >
+                                <Music />
+                            </button>
+                            <button
+                                className='btn btn-outline-danger'
+                                name='Mobile'
+                                onClick={handleCategory}
+                                title="Mobile"
+                            >
+                                <Smartphone />
+                            </button>
+                            <button
+                                className='btn btn-outline-warning'
+                                name='Tv'
+                                onClick={handleCategory}
+                                title="Tv"
+                            >
+                                <MonitorSmartphone />
+                            </button>
+                            <input
+                                type="text"
+                                className="form-control w-auto"
+                                placeholder='Search'
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            <button
+                                className='btn btn-primary'
+                                onClick={handleSearch}
+                                title="Search"
+                            >
+                                <Search />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div className="row g-4">
+                {!isLoading && <Shimmer />}
+                {isLoading && !error && filteredProducts.map((product) => (
+                    <div className="col-md-4" key={product.id}>
+                        <div className="card h-100 border-0 shadow rounded-4">
+                            <img src={product.image} alt="Invalid" className="img-fluid p-4" />
+                            <div className="card-body">
+                                <h5 className="card-title fw-semibold text-uppercase">{product.brand}</h5>
+                                <h5 className="card-title fw-light">
+                                    <pre className='fs-6 badge badge-warning'>{product.category}</pre>
+                                </h5>
+                                <h5 className="card-title fw-light">
+                                    <pre className='fs-6 text-wrap'>{product.title}</pre>
+                                </h5>
+                            </div>
+                            <div className="card-footer bg-white border-top-0">
+                                <h6 className="text-success fw-bold fs-4 badge badge-success badge-pill">₹{product.price}</h6>
+                                <div className="text-center">
+                                    <button className='btn btn-primary btn-lg badge badge-info'>Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {error && <Error message={error} />}
+            </div>
+        </div>
+    );
+};
+
+export default EffectCard;
